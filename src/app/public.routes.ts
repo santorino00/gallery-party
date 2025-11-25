@@ -9,9 +9,9 @@ export const PUBLIC_ROUTES: Routes = [
     path: ':slug',
     component: EventComponent,
     children: [
-      { path: '', redirectTo: 'gallery', pathMatch: 'full' },
-      { path: 'gallery', component: GalleryComponent, canActivate: [eventGuard] },
-      { path: 'upload', component: UploadComponent, canActivate: [eventGuard] },
-    ],
-  },
+      { path: '', redirectTo: './gallery', pathMatch: 'full' }, // usa solo 'gallery', non './gallery'
+      { path: 'gallery', component: GalleryComponent },
+      { path: 'upload', component: UploadComponent },
+    ]
+  }
 ];

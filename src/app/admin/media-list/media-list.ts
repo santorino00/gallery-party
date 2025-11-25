@@ -92,9 +92,9 @@ export class MediaListComponent implements OnInit {
 
   loadMedia(): void {
     this.media$ = this.mediaService.getMediaForEvent(this.eventId).pipe(
-      map(response => {
-        if (response.error) throw response.error;
-        return response.data as Media[];
+      map(mediaRes => {
+        if (mediaRes) throw mediaRes;
+        return mediaRes as Media[];
       })
     );
   }

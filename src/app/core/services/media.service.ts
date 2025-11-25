@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { from } from 'rxjs';
+import { from, map, mergeMap } from 'rxjs';
 import { SupabaseService } from './supabase.service';
 import { Media } from '../models/media.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MediaService {
   private supabase: SupabaseClient;
@@ -17,12 +17,48 @@ export class MediaService {
 
   // Get all media for a specific event
   getMediaForEvent(eventId: string) {
+    const BUCKET_NAME = 'event-media';
+    const SIGNED_URL_EXPIRES = 60 * 60; // 1 ora in secondi
+
     return from(
       this.supabase
         .from('media')
         .select('*')
         .eq('event_id', eventId)
         .order('created_at', { ascending: false })
+    ).pipe(
+      mergeMap(async (res: any) => {
+        if (res.error) throw res.error;
+
+        const mediaWithSignedUrls = await Promise.all(
+          res.data.map(async (item: any) => {
+            const fullUrl = item.url;
+            // bucket = 'event-media'
+
+            // rimuovi il prefisso pubblico
+            const relativePath = fullUrl.replace(
+              `https://bhmvthaeksqmncwjhkid.supabase.co/storage/v1/object/public/${BUCKET_NAME}/`,
+              ''
+            );
+
+            const { data: signedData, error } = await this.supabase.storage
+              .from(BUCKET_NAME)
+              .createSignedUrl(relativePath, SIGNED_URL_EXPIRES);
+
+            if (error) {
+              console.error('Errore generando signed URL:', error);
+              return { ...item, signedUrl: null };
+            }
+
+            return {
+              ...item,
+              signedUrl: signedData.signedUrl,
+            };
+          })
+        );
+
+        return mediaWithSignedUrls;
+      })
     );
   }
 
@@ -41,10 +77,9 @@ export class MediaService {
     }
 
     // Costruiamo l'URL pubblico
-    const { data: { publicUrl } } = this.supabase
-      .storage
-      .from(this.BUCKET_NAME)
-      .getPublicUrl(filePath);
+    const {
+      data: { publicUrl },
+    } = this.supabase.storage.from(this.BUCKET_NAME).getPublicUrl(filePath);
 
     return publicUrl;
   }
@@ -70,10 +105,7 @@ export class MediaService {
     }
 
     // 2. Delete the metadata from the database
-    const { error: dbError } = await this.supabase
-      .from('media')
-      .delete()
-      .eq('id', media.id);
+    const { error: dbError } = await this.supabase.from('media').delete().eq('id', media.id);
 
     if (dbError) {
       throw dbError;

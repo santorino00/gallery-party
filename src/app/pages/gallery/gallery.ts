@@ -27,7 +27,7 @@ import { Media } from '../../core/models/media.model';
       <mat-grid-list cols="4" rowHeight="1:1" gutterSize="16px">
         <mat-grid-tile *ngFor="let media of media$ | async">
           <mat-card class="media-card">
-            <img mat-card-image [src]="media.url" [alt]="media.description">
+            <img mat-card-image [src]="media.signedUrl" [alt]="media.description">
             <mat-card-header>
               <mat-card-subtitle>{{ media.description }}</mat-card-subtitle>
             </mat-card-header>
@@ -74,11 +74,10 @@ export class GalleryComponent implements OnInit {
       switchMap(eventRes => {
         if (eventRes.error) throw eventRes.error;
         this.eventId = eventRes.data.id;
-        return this.mediaService.getMediaForEvent(this.eventId);
+        return this.mediaService.getMediaForEvent(this.eventId)
       }),
-      map(mediaRes => {
-        if (mediaRes.error) throw mediaRes.error;
-        return mediaRes.data as Media[];
+      map((mediaRes: any) => {
+        return mediaRes;
       })
     );
   }

@@ -1,13 +1,12 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { MatTabsModule } from '@angular/material/tabs';
-import { PasswordDialogComponent } from '../password-dialog/password-dialog';
-import { EventService } from '../../core/services/event.service';
-import { AppEvent } from '../../core/models/event.model';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, Observable } from "rxjs";
+import { AppEvent } from "../../core/models/event.model";
+import { PasswordDialogComponent } from "../password-dialog/password-dialog";
+import { EventService } from "../../core/services/event.service";
+import { MatDialog, MatDialogModule } from "@angular/material/dialog";
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { Component, OnInit } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { MatTabsModule } from "@angular/material/tabs";
 
 @Component({
   selector: 'app-event',
@@ -21,32 +20,34 @@ import { map } from 'rxjs/operators';
     MatTabsModule
   ],
   template: `
-    <div *ngIf="event$ | async as event">
-      <header class="event-header">
-        <h1>{{ event.name }}</h1>
-        <p>{{ event.description }}</p>
-      </header>
+  <div *ngIf="event$ | async as event">
+    <header class="event-header">
+      <h1>{{ event.name }}</h1>
+      <p>{{ event.description }}</p>
+    </header>
 
-      <nav mat-tab-nav-bar>
-        <a mat-tab-link
-           *ngFor="let link of navLinks"
-           [routerLink]="link.path"
-           routerLinkActive #rla="routerLinkActive"
-           [active]="rla.isActive">
-          {{link.label}}
-        </a>
-      </nav>
+    <nav mat-tab-nav-bar>
+      <a mat-tab-link *ngFor="let link of navLinks"
+         [routerLink]="['./', link.path]"
+         [relativeTo]="route"
+         routerLinkActive #rla="routerLinkActive"
+         [active]="rla.isActive">{{ link.label }}</a>
+    </nav>
 
-      <div *ngIf="hasAccess">
-        <router-outlet></router-outlet>
-      </div>
+    <div *ngIf="hasAccess">
+      <router-outlet></router-outlet>
     </div>
-  `,
+  </div>
+`,
   styles: [`
     .event-header {
       padding: 24px;
       text-align: center;
       background: #f5f5f5;
+    }
+    nav.mat-tab-nav-bar {
+      margin-bottom: 16px;
+      justify-content: center;
     }
   `]
 })
@@ -54,13 +55,14 @@ export class EventComponent implements OnInit {
   slug!: string;
   event$!: Observable<AppEvent>;
   hasAccess = false;
+
   navLinks = [
     { path: 'gallery', label: 'Gallery' },
     { path: 'upload', label: 'Upload' }
   ];
 
   constructor(
-    private route: ActivatedRoute,
+    public route: ActivatedRoute,  // deve essere public per template
     private router: Router,
     private dialog: MatDialog,
     private eventService: EventService
@@ -69,11 +71,14 @@ export class EventComponent implements OnInit {
   ngOnInit(): void {
     this.slug = this.route.snapshot.paramMap.get('slug')!;
     if (!this.slug) {
-      this.router.navigate(['/']); // Redirect if no slug
+      this.router.navigate(['/']);
       return;
     }
 
-    this.event$ = this.eventService.getEventBySlug(this.slug).pipe(map(res => res.data as AppEvent));
+    this.event$ = this.eventService.getEventBySlug(this.slug).pipe(
+      map((res: any) => res.data as AppEvent)
+    );
+
     this.checkAccess();
   }
 
@@ -93,14 +98,11 @@ export class EventComponent implements OnInit {
       data: { slug: this.slug }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.hasAccess = true;
-        // Navigate to the gallery after successful password entry
-        this.router.navigate(['/', this.slug, 'gallery']);
-      } else {
-        // Optional: handle incorrect password case, maybe show an error
-        // For now, the dialog handles re-tries. If they close it, they are stuck.
+        // Redirect automatico alla gallery
+        this.router.navigate(['./', 'gallery'], { relativeTo: this.route });
       }
     });
   }
