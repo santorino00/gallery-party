@@ -1,18 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 
-import { Upload } from './upload';
+import { UploadComponent } from './upload';
 
-describe('Upload', () => {
-  let component: Upload;
-  let fixture: ComponentFixture<Upload>;
+describe('UploadComponent', () => {
+  let component: UploadComponent;
+  let fixture: ComponentFixture<UploadComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Upload]
-    })
-    .compileComponents();
+      imports: [UploadComponent, HttpClientTestingModule],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: () => 'test-slug',
+              },
+            },
+            paramMap: of({ get: () => 'test-slug' }),
+            params: of({ slug: 'test-slug' }),
+          },
+        },
+      ],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(Upload);
+    fixture = TestBed.createComponent(UploadComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

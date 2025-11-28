@@ -1,12 +1,13 @@
-import { map, Observable } from "rxjs";
-import { AppEvent } from "../../core/models/event.model";
-import { PasswordDialogComponent } from "../password-dialog/password-dialog";
-import { EventService } from "../../core/services/event.service";
-import { MatDialog, MatDialogModule } from "@angular/material/dialog";
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
+import { MatDialog, MatDialogModule } from "@angular/material/dialog";
 import { MatTabsModule } from "@angular/material/tabs";
+import { map, Observable } from "rxjs";
+
+import { AppEvent } from "../../core/models/event.model";
+import { EventService } from "../../core/services/event.service";
+import { PasswordDialogComponent } from "../password-dialog/password-dialog";
 
 @Component({
   selector: 'app-event',
@@ -65,7 +66,8 @@ export class EventComponent implements OnInit {
     public route: ActivatedRoute,  // deve essere public per template
     private router: Router,
     private dialog: MatDialog,
-    private eventService: EventService
+    private eventService: EventService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -101,8 +103,9 @@ export class EventComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         this.hasAccess = true;
-        // Redirect automatico alla gallery
-        this.router.navigate(['./', 'gallery'], { relativeTo: this.route });
+        // Forziamo il change detection per rendere disponibile il router-outlet
+        this.cdr.detectChanges();
+        // La navigazione alla gallery avverrà automaticamente grazie al redirectTo nella configurazione delle rotte
       }
     });
   }

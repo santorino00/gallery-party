@@ -89,7 +89,7 @@ export class GalleryComponent implements OnInit {
 
   ngOnInit(): void {
     // We need to get the event ID from the slug
-    this.media$ = this.route.parent!.paramMap.pipe(
+    this.media$ = this.route.paramMap.pipe(
       switchMap((params) => {
         const slug = params.get('slug')!;
         return this.eventService.getEventBySlug(slug);
