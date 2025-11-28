@@ -1,0 +1,26 @@
+<div class="lightbox-overlay" (click)="close()">
+  <div class="lightbox-content" (click)="$event.stopPropagation()">
+
+    <!-- Prev/Next frecce -->
+    <button mat-icon-button class="nav-left" (click)="prev()" [disabled]="currentIndex === 0">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button mat-icon-button class="nav-right" (click)="next()" [disabled]="currentIndex === mediaList.length - 1">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <!-- Immagine o Video -->
+    <img *ngIf="currentMedia.type === 'photo'" [src]="currentMedia.signedUrl" [alt]="currentMedia.description" />
+    <video *ngIf="currentMedia.type === 'video'" [src]="currentMedia.signedUrl" controls autoplay muted></video>
+
+    <div class="lightbox-footer">
+      <span>{{ currentMedia.description }}</span>
+      <button mat-icon-button color="primary" (click)="downloadMedia()">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button mat-icon-button color="warn" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

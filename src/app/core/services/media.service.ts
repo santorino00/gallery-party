@@ -15,7 +15,6 @@ export class MediaService {
     this.supabase = this.supabaseService.supabase;
   }
 
-  // Get all media for a specific event
   getMediaForEvent(eventId: string) {
     const BUCKET_NAME = 'event-media';
     const SIGNED_URL_EXPIRES = 60 * 60; // 1 ora in secondi
@@ -33,26 +32,48 @@ export class MediaService {
         const mediaWithSignedUrls = await Promise.all(
           res.data.map(async (item: any) => {
             const fullUrl = item.url;
-            // bucket = 'event-media'
 
-            // rimuovi il prefisso pubblico
             const relativePath = fullUrl.replace(
               `https://bhmvthaeksqmncwjhkid.supabase.co/storage/v1/object/public/${BUCKET_NAME}/`,
               ''
             );
 
-            const { data: signedData, error } = await this.supabase.storage
+            // URL ORIGINALE (funziona per tutti)
+            const { data: signedData } = await this.supabase.storage
               .from(BUCKET_NAME)
               .createSignedUrl(relativePath, SIGNED_URL_EXPIRES);
 
-            if (error) {
-              console.error('Errore generando signed URL:', error);
-              return { ...item, signedUrl: null };
+            // rileva il tipo dal nome del file
+            const ext = relativePath.split('.').pop()?.toLowerCase();
+            const isImage = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext);
+            const isVideo = ['mp4', 'mov', 'webm', 'avi', 'mkv'].includes(ext);
+
+            let thumbUrl = null;
+
+            // SE È UN’IMMAGINE → genera thumbnail
+            if (isImage) {
+              const { data: signedThumb } = await this.supabase.storage
+                .from(BUCKET_NAME)
+                .createSignedUrl(relativePath, SIGNED_URL_EXPIRES, {
+                  transform: {
+                    width: 300,
+                    quality: 60,
+                  },
+                });
+
+              thumbUrl = signedThumb?.signedUrl ?? null;
+            }
+
+            // SE È UN VIDEO → nessuna trasformazione (Supabase non può)
+            if (isVideo) {
+              thumbUrl = null; // puoi lasciarlo null o generare uno snapshot
             }
 
             return {
               ...item,
-              signedUrl: signedData.signedUrl,
+              signedUrl: signedData?.signedUrl ?? null,
+              thumbUrl,
+              type: isVideo ? 'video' : 'photo',
             };
           })
         );

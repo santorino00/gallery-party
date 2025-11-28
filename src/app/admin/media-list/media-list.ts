@@ -23,7 +23,7 @@ import { AppEvent } from '../../core/models/event.model';
     MatButtonModule,
     MatIconModule,
     MatSnackBarModule,
-    MatGridListModule
+    MatGridListModule,
   ],
   template: `
     <div *ngIf="event$ | async as event" class="media-list-header">
@@ -36,9 +36,27 @@ import { AppEvent } from '../../core/models/event.model';
         <p>No media has been uploaded for this event yet.</p>
       </mat-grid-tile>
 
-      <mat-grid-tile *ngFor="let media of mediaList" [style.background-image]="'url(' + media.url + ')'" class="media-tile">
+      <mat-grid-tile *ngFor="let media of mediaList" class="media-tile">
+        <!-- IMMAGINE -->
+        <img
+          *ngIf="media.type === 'photo'"
+          mat-card-image
+          [src]="media.thumbUrl || media.signedUrl"
+          [alt]="media.description"
+          loading="lazy"
+        />
+
+        <!-- VIDEO -->
+        <video
+          *ngIf="media.type === 'video'"
+          [src]="media.signedUrl"
+          controls
+          muted
+          style="width: 100%; height: 100%; object-fit: cover;"
+        ></video>
+
         <mat-grid-tile-footer>
-           <div class="media-actions">
+          <div class="media-actions">
             <span>{{ media.description }}</span>
             <span class="spacer"></span>
             <button mat-icon-button color="warn" (click)="deleteMedia(media)">
@@ -49,26 +67,28 @@ import { AppEvent } from '../../core/models/event.model';
       </mat-grid-tile>
     </mat-grid-list>
   `,
-  styles: [`
-    .media-list-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    .media-tile {
-      background-size: cover;
-      background-position: center;
-    }
-    .media-actions {
+  styles: [
+    `
+      .media-list-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+      .media-tile {
+        background-size: cover;
+        background-position: center;
+      }
+      .media-actions {
         width: 100%;
         display: flex;
         align-items: center;
-    }
-    .spacer {
+      }
+      .spacer {
         flex: 1 1 auto;
-    }
-  `]
+      }
+    `,
+  ],
 })
 export class MediaListComponent implements OnInit {
   eventId!: string;
@@ -85,15 +105,16 @@ export class MediaListComponent implements OnInit {
   ngOnInit(): void {
     this.eventId = this.route.snapshot.paramMap.get('eventId')!;
     if (this.eventId) {
-      this.event$ = this.eventService.getEventById(this.eventId).pipe(map(res => res.data as AppEvent));
+      this.event$ = this.eventService
+        .getEventById(this.eventId)
+        .pipe(map((res) => res.data as AppEvent));
       this.loadMedia();
     }
   }
 
   loadMedia(): void {
     this.media$ = this.mediaService.getMediaForEvent(this.eventId).pipe(
-      map(mediaRes => {
-        if (mediaRes) throw mediaRes;
+      map((mediaRes) => {
         return mediaRes as Media[];
       })
     );

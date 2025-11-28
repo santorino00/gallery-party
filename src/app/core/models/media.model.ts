@@ -5,5 +5,6 @@ export interface Media {
   type: 'photo' | 'video';
   description?: string;
   created_at?: string;
-  signedUrl?: string
+  signedUrl?: string;
+  thumbUrl?: string;
 }

@@ -12,7 +12,7 @@ export const routes: Routes = [
   // Aggiungeremo una wildcard route per le pagine non trovate
   {
     path: '**',
-    redirectTo: '', // o una pagina 404 dedicata
+    redirectTo: '/admin', // o una pagina 404 dedicata
     pathMatch: 'full'
   }
 ];
