@@ -96,7 +96,7 @@ export class UploadComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.parent!.paramMap.pipe(
+    this.route.paramMap.pipe(
       switchMap(params => {
         this.eventSlug = params.get('slug')!;
         return this.eventService.getEventBySlug(this.eventSlug);

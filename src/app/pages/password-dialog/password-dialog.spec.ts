@@ -1,18 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { PasswordDialog } from './password-dialog';
+import { PasswordDialogComponent } from './password-dialog';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
-describe('PasswordDialog', () => {
-  let component: PasswordDialog;
-  let fixture: ComponentFixture<PasswordDialog>;
+describe('PasswordDialogComponent', () => {
+  let component: PasswordDialogComponent;
+  let fixture: ComponentFixture<PasswordDialogComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PasswordDialog]
-    })
-    .compileComponents();
+      imports: [PasswordDialogComponent, NoopAnimationsModule],
+      providers: [
+        { provide: MatDialogRef, useValue: {} },
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+      ],
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(PasswordDialog);
+    fixture = TestBed.createComponent(PasswordDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

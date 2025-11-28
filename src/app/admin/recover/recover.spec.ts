@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Recover } from './recover';
+import { RecoverComponent } from './recover';
 
-describe('Recover', () => {
-  let component: Recover;
-  let fixture: ComponentFixture<Recover>;
+describe('RecoverComponent', () => {
+  let component: RecoverComponent;
+  let fixture: ComponentFixture<RecoverComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Recover]
+      imports: [RecoverComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Recover);
+    fixture = TestBed.createComponent(RecoverComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
